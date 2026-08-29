@@ -9,6 +9,10 @@ const ASSESSMENT_TYPES = [
   'Heimadæmi','Verkefni','Dæmatími','Stöðumat','Annað',
 ]
 
+const COURSE_COLORS = [
+  '#3DDC97','#4f8ef7','#f97316','#a855f7','#ec4899','#eab308','#06b6d4','#f43f5e',
+]
+
 const TYPE_COLORS = {
   'Lokapróf':         '#ef4444',
   'Miðmisserisspróf': '#f97316',
@@ -41,8 +45,8 @@ function gradeColor(g) {
   return '#f87171'
 }
 
-function newCourse(name = 'Nýr áfangi') {
-  return { id: uid(), name, assessments: [], bestOfRules: {}, lokaprófMin: 5 }
+function newCourse(name = 'Nýr áfangi', colorIdx = 0) {
+  return { id: uid(), name, color: COURSE_COLORS[colorIdx % COURSE_COLORS.length], assessments: [], bestOfRules: {}, lokaprófMin: 5 }
 }
 
 function newAssessment(overrides = {}) {
@@ -133,8 +137,8 @@ function loadData() {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const parsed = JSON.parse(raw)
-      parsed.courses = parsed.courses.map(c => ({
-        bestOfRules: {}, lokaprófMin: 5, ...c,
+      parsed.courses = parsed.courses.map((c, i) => ({
+        bestOfRules: {}, lokaprófMin: 5, color: COURSE_COLORS[i % COURSE_COLORS.length], ...c,
         assessments: (c.assessments || []).map(({ group: _g, ...a }) => a)
       }))
       return parsed
@@ -274,6 +278,7 @@ function RulesPanel({ assessments, bestOfRules, onChange }) {
 function CoursePage({ course, onChange }) {
   const [dragId, setDragId] = useState(null)
   const [dragOverId, setDragOverId] = useState(null)
+  const [targetGrade, setTargetGrade] = useState(5)
 
   const stats = calcCourse(course)
   const weightOver = stats.totalWeight > 100.01
@@ -436,6 +441,34 @@ function CoursePage({ course, onChange }) {
       {/* Rules panel — collapsible, auto-appears when any type has 2+ rows */}
       <RulesPanel assessments={course.assessments} bestOfRules={course.bestOfRules} onChange={updateBestOf} />
 
+      {/* Grade calculator */}
+      {!stats.weightError && course.assessments.length > 0 && (() => {
+        const ungradedWeight = Math.max(0, stats.totalWeight - stats.completedWeight)
+        if (ungradedWeight < 0.01) return null
+        const needed = (targetGrade - stats.earnedPoints) / (ungradedWeight / 100)
+        const impossible = needed > 10
+        const alreadyDone = needed <= 0
+        return (
+          <div className="calc-bar">
+            <span className="calc-lbl">Til að ná</span>
+            <input
+              className="calc-input"
+              type="number" min="0" max="10" step="0.5"
+              value={targetGrade}
+              onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) setTargetGrade(v) }}
+            />
+            <span className="calc-lbl">þarftu að meðaltali</span>
+            {impossible
+              ? <span className="calc-result impossible">Ekki mögulegt</span>
+              : alreadyDone
+              ? <span className="calc-result done">Þegar náð ✓</span>
+              : <span className="calc-result" style={{ color: gradeColor(needed) }}>{fmt(needed)}</span>
+            }
+            {!impossible && !alreadyDone && <span className="calc-lbl">í eftirstandandi {fmt(ungradedWeight, 0)}%</span>}
+          </div>
+        )
+      })()}
+
       {/* Table */}
       <div className="table-wrap">
         <table className="assess-tbl">
@@ -489,6 +522,7 @@ function CoursePage({ course, onChange }) {
       </div>
 
       <button className="add-btn" onClick={addA}>+ Bæta við mati</button>
+      <button className="print-btn" onClick={() => window.print()}>⎙ Prenta / Vista sem PDF</button>
     </div>
   )
 }
@@ -504,11 +538,13 @@ function LoginScreen({ onGuest }) {
     <div className="login-wrap">
       <div className="login-card">
         <div className="login-brand">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="login-icon">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+          <svg className="login-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" rx="12" fill="#101A15"/>
+            <rect x="10" y="30" width="7" height="10" rx="2.5" fill="#2F6B52"/>
+            <rect x="20.5" y="22" width="7" height="18" rx="2.5" fill="#2F9D74"/>
+            <rect x="31" y="10" width="7" height="30" rx="2.5" fill="#3DDC97"/>
           </svg>
-          <span className="login-title">Einkunnabok</span>
+          <span className="login-title">Einkunnir.is</span>
           <span className="login-sub">Einkunnakerfið þitt</span>
         </div>
 
@@ -553,19 +589,20 @@ function LoginScreen({ onGuest }) {
 // ── App ────────────────────────────────────────────────────────────
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [data, setData] = useState(loadData)
   const [activeId, setActiveId] = useState(() => loadData().courses[0]?.id)
   const [editingId, setEditingId] = useState(null)
-
-  if (!loggedIn) return <LoginScreen onGuest={() => setLoggedIn(true)} />
 
   useEffect(() => { saveData(data) }, [data])
   useEffect(() => {
     if (!data.courses.find(c => c.id === activeId)) setActiveId(data.courses[0]?.id)
   }, [data.courses, activeId])
 
+  if (!loggedIn) return <LoginScreen onGuest={() => setLoggedIn(true)} />
+
   function addCourse() {
-    const c = newCourse(`Áfangi ${data.courses.length + 1}`)
+    const c = newCourse(`Áfangi ${data.courses.length + 1}`, data.courses.length)
     setData(d => ({ ...d, courses: [...d.courses, c] }))
     setActiveId(c.id); setEditingId(c.id)
   }
@@ -588,12 +625,17 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-hdr">
+        <button className="hamburger" onClick={() => setSidebarOpen(o => !o)} aria-label="Valmynd">
+          <span /><span /><span />
+        </button>
         <div className="brand">
-          <svg className="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+          <svg className="brand-icon" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" rx="12" fill="#101A15"/>
+            <rect x="10" y="30" width="7" height="10" rx="2.5" fill="#2F6B52"/>
+            <rect x="20.5" y="22" width="7" height="18" rx="2.5" fill="#2F9D74"/>
+            <rect x="31" y="10" width="7" height="30" rx="2.5" fill="#3DDC97"/>
           </svg>
-          <span>Einkunnabok</span>
+          <span>Einkunnir<span style={{ color: 'var(--accent)' }}>.is</span></span>
         </div>
         <div className="hdr-right">
           <span className="hdr-guest">Gestur</span>
@@ -601,15 +643,16 @@ export default function App() {
         </div>
       </header>
 
+      {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
       <div className="layout">
-        <aside className="sidebar">
+        <aside className={`sidebar${sidebarOpen ? ' open' : ''}`}>
           <div className="sb-heading">Áfangar</div>
           <nav className="course-list">
             {data.courses.map(c => {
               const stats = calcCourse(c)
               const isActive = c.id === activeId
               return (
-                <div key={c.id} className={`c-item ${isActive ? 'active' : ''}`} onClick={() => setActiveId(c.id)}>
+                <div key={c.id} className={`c-item ${isActive ? 'active' : ''}`} onClick={() => { setActiveId(c.id); setSidebarOpen(false) }}>
                   {editingId === c.id ? (
                     <input
                       className="c-name-edit" autoFocus value={c.name}
@@ -620,6 +663,7 @@ export default function App() {
                     />
                   ) : (
                     <>
+                      <span className="c-dot" style={{ background: c.color || '#3DDC97' }} />
                       <span className="c-name" onDoubleClick={e => { e.stopPropagation(); setEditingId(c.id) }}>{c.name}</span>
                       <span className="c-grade" style={{ color: gradeColor(stats.currentAvg) }}>
                         {stats.currentAvg !== null ? fmt(stats.currentAvg, 1) : '—'}

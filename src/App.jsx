@@ -157,6 +157,7 @@ function AssessmentRow({ a, isExcluded, isDragOver, isDragging, onUpdate, onDele
   const w = parseNum(a.weight)
   const contribution = (!isNaN(g) && !isNaN(w) && a.grade !== '' && a.weight !== '') ? g * w / 100 : null
   const dot = TYPE_COLORS[a.type] || '#6b7280'
+  const gradeInvalid = a.grade !== '' && !isNaN(g) && (g < 0 || g > 10)
 
   return (
     <tr
@@ -189,7 +190,7 @@ function AssessmentRow({ a, isExcluded, isDragOver, isDragging, onUpdate, onDele
       </td>
       <td>
         <input
-          className="ri ri-num"
+          className={`ri ri-num${gradeInvalid ? ' invalid' : ''}`}
           inputMode="decimal"
           placeholder="0–10"
           value={a.grade}
@@ -593,6 +594,12 @@ export default function App() {
   const [data, setData] = useState(loadData)
   const [activeId, setActiveId] = useState(() => loadData().courses[0]?.id)
   const [editingId, setEditingId] = useState(null)
+  const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark')
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
+    localStorage.setItem('theme', dark ? 'dark' : 'light')
+  }, [dark])
 
   useEffect(() => { saveData(data) }, [data])
   useEffect(() => {
@@ -638,6 +645,9 @@ export default function App() {
           <span>Einkunnir<span style={{ color: 'var(--accent)' }}>.is</span></span>
         </div>
         <div className="hdr-right">
+          <button className="theme-toggle" onClick={() => setDark(d => !d)} title={dark ? 'Ljóst þema' : 'Dökkt þema'}>
+            {dark ? '☀' : '☽'}
+          </button>
           <span className="hdr-guest">Gestur</span>
           <button className="hdr-logout" onClick={() => setLoggedIn(false)}>Útskrá</button>
         </div>
@@ -646,7 +656,6 @@ export default function App() {
       {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
       <div className="layout">
         <aside className={`sidebar${sidebarOpen ? ' open' : ''}`}>
-          <div className="sb-heading">Áfangar</div>
           <nav className="course-list">
             {data.courses.map(c => {
               const stats = calcCourse(c)

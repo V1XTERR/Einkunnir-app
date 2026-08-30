@@ -610,10 +610,10 @@ html, body, #root {
 /* ── Table ────────────────────────────────────────────────────────── */
 .table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin-bottom: 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  overflow: hidden;
   box-shadow: var(--shadow-xs);
 }
 
@@ -968,7 +968,7 @@ input[type=number] { -moz-appearance: textfield; }
     top: 54px;
     left: 0;
     bottom: 0;
-    width: 260px;
+    width: 270px;
     z-index: 50;
     transform: translateX(-100%);
     transition: transform 0.22s ease;
@@ -977,15 +977,61 @@ input[type=number] { -moz-appearance: textfield; }
   }
   .sidebar.open { transform: translateX(0); }
 
-  .sum-grid { grid-template-columns: 1fr 1fr; }
-  .content { padding: 18px 16px; }
-  .s-grade { font-size: 50px; }
+  /* Bigger touch targets in sidebar */
+  .c-item { min-height: 48px; padding: 10px 12px; }
+  .add-course-btn { padding: 12px; }
+
+  .sum-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .content { padding: 14px 12px; }
+  .s-grade { font-size: 52px; }
   .card-main { grid-column: 1 / -1; }
+  .sum-card { padding: 14px 16px; }
+  .card-main { padding: 14px 16px; }
+
+  /* Prevent iOS zoom on input focus (must be ≥16px) */
+  input, select, textarea { font-size: 16px !important; }
+
+  /* Table: hide less important columns, keep it usable */
+  /* Hide: drag(1), label(3), date(6), contribution(7) */
+  .drag-td,
+  .assess-tbl th.th-drag { display: none; }
+  .assess-tbl th:nth-child(3),
+  .assess-tbl td:nth-child(3) { display: none; }
+  .assess-tbl th:nth-child(6),
+  .assess-tbl td:nth-child(6) { display: none; }
+  .assess-tbl th:nth-child(7),
+  .assess-tbl td:nth-child(7) { display: none; }
+
+  /* Type selector — remove fixed min-width on mobile */
+  .type-sel { min-width: 90px; font-size: 13px; }
+
+  /* Bigger tap targets for table rows */
+  .assess-row td { padding: 12px 10px; }
+  .assess-tbl th { padding: 10px; }
+  .ibtn { padding: 8px 7px; }
+
+  /* Calc bar wraps nicely */
+  .calc-bar { gap: 8px; padding: 10px 12px; }
+
+  /* Settings bar stacks */
+  .settings-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+
+  /* Rules panel */
+  .rule-row { flex-wrap: wrap; }
+  .rule-type { min-width: unset; }
+
+  /* Add/print buttons */
+  .add-btn, .print-btn { width: 100%; justify-content: center; }
+  .print-btn { margin-left: 0; }
+
+  /* Course title */
+  .course-title { font-size: 20px; }
 }
 
-@media (max-width: 480px) {
-  .assess-tbl th:nth-child(6), .assess-tbl td:nth-child(6) { display: none; }
+@media (max-width: 400px) {
   .brand span { display: none; }
+  .sum-grid { grid-template-columns: 1fr; }
+  .card-main { grid-column: unset; }
 }
 
 /* ── Print ────────────────────────────────────────────────────────── */

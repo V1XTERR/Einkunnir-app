@@ -997,9 +997,11 @@ input[type=number] { -moz-appearance: textfield; }
   /* Prevent iOS zoom on input focus (must be ≥16px) */
   input, select, textarea { font-size: 16px !important; }
 
-  /* Hide only drag handle — table scrolls horizontally for everything else */
+  /* Mobile table: show Tegund, Einkunn, Vægi, Gildi, Delete — hide the rest */
   .drag-td, .assess-tbl th.th-drag { display: none; }
-  .type-sel { min-width: 110px; }
+  .assess-tbl th:nth-child(3), .assess-tbl td:nth-child(3) { display: none; } /* Nafn */
+  .assess-tbl th:nth-child(6), .assess-tbl td:nth-child(6) { display: none; } /* Dagsetning */
+  .type-sel { min-width: 100px; }
 
   /* Action column: delete always visible on mobile */
   .ibtn.del { color: var(--fail) !important; opacity: 0.75; }

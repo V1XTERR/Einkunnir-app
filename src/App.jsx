@@ -481,7 +481,7 @@ function CoursePage({ course, onChange }) {
               <th>Einkunn</th>
               <th>Vægi</th>
               <th>Dagsetning</th>
-              <th>Framlag</th>
+              <th>Gildi</th>
               <th />
             </tr>
           </thead>

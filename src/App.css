@@ -248,6 +248,7 @@ html, body, #root {
 .lfield-inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(5,150,105,0.12); }
 .lfield-inp:disabled { opacity: 0.4; cursor: not-allowed; }
 .lfield-inp::placeholder { color: var(--text-faint); }
+.lfield-inp.inp-error { border-color: var(--fail); box-shadow: 0 0 0 3px rgba(220,38,38,0.12); }
 
 .login-notice {
   font-size: 12px;

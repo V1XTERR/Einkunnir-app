@@ -534,6 +534,19 @@ function LoginScreen({ onGuest }) {
   const [email, setEmail] = useState('')
   const [pw, setPw] = useState('')
   const [notice] = useState('Innskráning með tölvupósti kemur fljótlega.')
+  const [guestMode, setGuestMode] = useState(false)
+  const [passcode, setPasscode] = useState('')
+  const [passcodeError, setPasscodeError] = useState(false)
+
+  function handlePasscode(e) {
+    e.preventDefault()
+    if (passcode === '9999') {
+      onGuest()
+    } else {
+      setPasscodeError(true)
+      setPasscode('')
+    }
+  }
 
   return (
     <div className="login-wrap">
@@ -549,39 +562,61 @@ function LoginScreen({ onGuest }) {
           <span className="login-sub">Einkunnakerfið þitt</span>
         </div>
 
-        <div className="login-tabs">
-          <button className={`ltab${tab === 'login' ? ' active' : ''}`} onClick={() => setTab('login')}>Innskráning</button>
-          <button className={`ltab${tab === 'register' ? ' active' : ''}`} onClick={() => setTab('register')}>Stofna aðgang</button>
-        </div>
-
-        <div className="login-fields">
-          <div className="lfield">
-            <label className="lfield-lbl">Netfang</label>
-            <input className="lfield-inp" type="email" placeholder="nafn@hi.is" value={email} onChange={e => setEmail(e.target.value)} disabled />
-          </div>
-          <div className="lfield">
-            <label className="lfield-lbl">Lykilorð</label>
-            <input className="lfield-inp" type="password" placeholder="••••••••" value={pw} onChange={e => setPw(e.target.value)} disabled />
-          </div>
-          {tab === 'register' && (
+        {guestMode ? (
+          <form onSubmit={handlePasscode} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div className="lfield">
-              <label className="lfield-lbl">Staðfesta lykilorð</label>
-              <input className="lfield-inp" type="password" placeholder="••••••••" disabled />
+              <label className="lfield-lbl">Sláðu inn aðgangskóða</label>
+              <input
+                className={`lfield-inp${passcodeError ? ' inp-error' : ''}`}
+                type="number"
+                inputMode="numeric"
+                placeholder="0000"
+                value={passcode}
+                autoFocus
+                onChange={e => { setPasscode(e.target.value); setPasscodeError(false) }}
+              />
+              {passcodeError && <span style={{ fontSize: 12, color: 'var(--fail)', fontWeight: 600 }}>Rangur kóði — reyndu aftur</span>}
             </div>
-          )}
-        </div>
+            <button className="login-btn" type="submit">Staðfesta</button>
+            <button className="guest-btn" type="button" onClick={() => { setGuestMode(false); setPasscode(''); setPasscodeError(false) }}>← Til baka</button>
+          </form>
+        ) : (
+          <>
+            <div className="login-tabs">
+              <button className={`ltab${tab === 'login' ? ' active' : ''}`} onClick={() => setTab('login')}>Innskráning</button>
+              <button className={`ltab${tab === 'register' ? ' active' : ''}`} onClick={() => setTab('register')}>Stofna aðgang</button>
+            </div>
 
-        <div className="login-notice">{notice}</div>
+            <div className="login-fields">
+              <div className="lfield">
+                <label className="lfield-lbl">Netfang</label>
+                <input className="lfield-inp" type="email" placeholder="nafn@hi.is" value={email} onChange={e => setEmail(e.target.value)} disabled />
+              </div>
+              <div className="lfield">
+                <label className="lfield-lbl">Lykilorð</label>
+                <input className="lfield-inp" type="password" placeholder="••••••••" value={pw} onChange={e => setPw(e.target.value)} disabled />
+              </div>
+              {tab === 'register' && (
+                <div className="lfield">
+                  <label className="lfield-lbl">Staðfesta lykilorð</label>
+                  <input className="lfield-inp" type="password" placeholder="••••••••" disabled />
+                </div>
+              )}
+            </div>
 
-        <button className="login-btn" disabled>
-          {tab === 'login' ? 'Skrá inn' : 'Stofna aðgang'}
-        </button>
+            <div className="login-notice">{notice}</div>
 
-        <div className="login-divider"><span>eða</span></div>
+            <button className="login-btn" disabled>
+              {tab === 'login' ? 'Skrá inn' : 'Stofna aðgang'}
+            </button>
 
-        <button className="guest-btn" onClick={onGuest}>
-          Prófa sem gestur
-        </button>
+            <div className="login-divider"><span>eða</span></div>
+
+            <button className="guest-btn" onClick={() => setGuestMode(true)}>
+              Halda áfram sem gestur
+            </button>
+          </>
+        )}
       </div>
     </div>
   )

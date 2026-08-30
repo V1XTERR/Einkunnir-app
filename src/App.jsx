@@ -708,10 +708,13 @@ export default function App() {
                   ) : (
                     <>
                       <span className="c-dot" style={{ background: c.color || '#3DDC97' }} />
-                      <span className="c-name" onDoubleClick={e => { e.stopPropagation(); setEditingId(c.id) }}>{c.name}</span>
+                      <span className="c-name">{c.name}</span>
                       <span className="c-grade" style={{ color: gradeColor(stats.currentAvg) }}>
                         {stats.currentAvg !== null ? fmt(stats.currentAvg, 1) : '—'}
                       </span>
+                      {isActive && (
+                        <button className="c-edit" onClick={e => { e.stopPropagation(); setEditingId(c.id) }} title="Endurnefna">✎</button>
+                      )}
                     </>
                   )}
                   {data.courses.length > 1 && (
@@ -736,8 +739,9 @@ export default function App() {
                     onKeyDown={e => e.key === 'Enter' && setEditingId(null)}
                   />
                 ) : (
-                  <h2 className="course-title" onDoubleClick={() => setEditingId(activeCourse.id)}>
-                    {activeCourse.name}<span className="edit-hint">✎</span>
+                  <h2 className="course-title">
+                    {activeCourse.name}
+                    <button className="title-edit-btn" onClick={() => setEditingId(activeCourse.id)} title="Endurnefna">✎</button>
                   </h2>
                 )}
               </div>

@@ -418,6 +418,20 @@ html, body, #root {
 .c-item:hover .c-del { display: block; }
 .c-del:hover { color: var(--fail); background: var(--fail-light); }
 
+.c-edit {
+  background: none;
+  border: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 3px 4px;
+  border-radius: 3px;
+  transition: color 0.1s, background 0.1s;
+  flex-shrink: 0;
+}
+.c-edit:hover { color: var(--accent); background: var(--accent-dim); }
+
 .c-name-edit {
   flex: 1;
   background: var(--surface);
@@ -468,8 +482,19 @@ html, body, #root {
   color: var(--text);
 }
 
-.edit-hint { font-size: 14px; color: var(--text-faint); font-weight: 400; opacity: 0; transition: opacity 0.12s; }
-.course-title:hover .edit-hint { opacity: 1; }
+.title-edit-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: var(--text-faint);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+  transition: color 0.12s, background 0.12s;
+  flex-shrink: 0;
+}
+.title-edit-btn:hover { color: var(--accent); background: var(--accent-dim); }
 
 .title-edit {
   font-size: 26px;
@@ -1037,22 +1062,50 @@ input[type=number] { -moz-appearance: textfield; }
 
 /* ── Print ────────────────────────────────────────────────────────── */
 @media print {
+  /* Reset every height/overflow that the flex shell creates */
+  html, body, #root, .app, .layout, .content {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  body { background: #fff !important; color: #000 !important; }
+
+  /* Hide all interactive / nav chrome */
   .sidebar, .sidebar-overlay, .hamburger,
   .app-hdr, .add-btn, .print-btn, .add-course-btn,
-  .action-td, .drag-td, .drag-hdl,
+  .action-td, .drag-td, .drag-hdl, .ibtn,
   .settings-bar, .rules-panel, .calc-bar,
   .prog-wrap, .weight-error { display: none !important; }
 
-  .app { height: auto; }
-  .layout { display: block; }
-  .content { padding: 0; overflow: visible; background: #fff; }
-  .table-wrap { border: 1px solid #ddd; border-radius: 0; box-shadow: none; }
-  .assess-tbl th, .assess-tbl td { color: #000 !important; background: #fff !important; border-color: #ddd !important; }
-  .assess-row:nth-child(even) td { background: #f9f9f9 !important; }
-  .sum-grid { grid-template-columns: repeat(4,1fr); gap: 8px; }
-  .sum-card, .card-main { background: #fff !important; border: 1px solid #ddd !important; border-top: 1px solid #ddd !important; box-shadow: none; }
-  .s-lbl, .s-sub, .s-unit { color: #555 !important; }
-  .s-grade, .s-val { color: #000 !important; }
-  .course-title { color: #000; }
-  body { background: #fff; color: #000; }
+  /* Layout */
+  .layout { display: block !important; }
+  .content { padding: 0 !important; background: #fff !important; }
+
+  /* Un-hide columns that the mobile media query hides */
+  .assess-tbl th, .assess-tbl td { display: table-cell !important; }
+
+  /* Table */
+  .table-wrap {
+    overflow: visible !important;
+    border: 1px solid #ccc !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  .assess-tbl { width: 100% !important; border-collapse: collapse !important; }
+  .assess-tbl th { color: #333 !important; background: #f5f5f5 !important; border-color: #ccc !important; }
+  .assess-tbl td { color: #000 !important; background: #fff !important; border-color: #ccc !important; }
+  .assess-row:nth-child(even) td { background: #fafafa !important; }
+
+  /* Summary grid */
+  .sum-grid { grid-template-columns: repeat(4,1fr) !important; gap: 8px !important; }
+  .sum-card, .card-main {
+    background: #fff !important;
+    border: 1px solid #ccc !important;
+    border-top: 1px solid #ccc !important;
+    box-shadow: none !important;
+  }
+  .s-lbl, .s-sub, .s-unit, .s-val { color: #333 !important; }
+  .s-grade { color: #000 !important; font-size: 40px !important; }
+  .course-title { color: #000 !important; }
 }

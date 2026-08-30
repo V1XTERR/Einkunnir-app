@@ -698,7 +698,7 @@ export default function App() {
                 <div
                   key={c.id}
                   className={`c-item${isActive ? ' active' : ''}`}
-                  onClick={() => { setActiveId(c.id); setSidebarOpen(false) }}
+                  onClick={() => { if (!isActive) { setActiveId(c.id); setSidebarOpen(false) } }}
                 >
                   <span className="c-dot" style={{ background: c.color || '#3DDC97' }} />
                   {isActive ? (

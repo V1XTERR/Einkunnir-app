@@ -680,8 +680,8 @@ export default function App() {
           <span>Einkunnir<span style={{ color: 'var(--accent)' }}>.is</span></span>
         </div>
         <div className="hdr-right">
-          <button className="theme-toggle" onClick={() => setDark(d => !d)} title={dark ? 'Ljóst þema' : 'Dökkt þema'}>
-            {dark ? '☀' : '☽'}
+          <button className="theme-toggle" onClick={() => setDark(d => !d)}>
+            {dark ? 'Ljóst' : 'Dökkt'}
           </button>
           <span className="hdr-guest">Gestur</span>
           <button className="hdr-logout" onClick={() => setLoggedIn(false)}>Útskrá</button>

@@ -1005,16 +1005,14 @@ input[type=number] { -moz-appearance: textfield; }
   /* Prevent iOS zoom on input focus (must be ≥16px) */
   input, select, textarea { font-size: 16px !important; }
 
-  /* Table: hide less important columns, keep it usable */
-  /* Hide: drag(1), label(3), date(6), contribution(7) */
-  .drag-td,
-  .assess-tbl th.th-drag { display: none; }
-  .assess-tbl th:nth-child(3),
-  .assess-tbl td:nth-child(3) { display: none; }
-  .assess-tbl th:nth-child(6),
-  .assess-tbl td:nth-child(6) { display: none; }
-  .assess-tbl th:nth-child(7),
-  .assess-tbl td:nth-child(7) { display: none; }
+  /* Hide only drag handle — table scrolls horizontally for everything else */
+  .drag-td, .assess-tbl th.th-drag { display: none; }
+  .type-sel { min-width: 110px; }
+
+  /* Action column: delete always visible on mobile */
+  .ibtn.del { color: var(--fail) !important; opacity: 0.75; }
+  .ibtn.dup { display: none; }
+  .action-td { padding-right: 8px !important; }
 
   /* Type selector — remove fixed min-width on mobile */
   .type-sel { min-width: 90px; font-size: 13px; }

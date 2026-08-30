@@ -426,16 +426,19 @@ html, body, #root {
 .c-del:hover { color: var(--fail); background: var(--fail-light); }
 
 
-.c-name-edit {
+.c-name-inline {
   flex: 1;
-  background: var(--surface);
-  border: 1.5px solid var(--accent);
-  border-radius: var(--radius-sm);
-  color: var(--text);
+  background: none;
+  border: none;
+  border-bottom: 1.5px solid var(--accent);
+  color: var(--accent);
   font-size: 13px;
-  padding: 2px 7px;
+  font-weight: 700;
+  padding: 0 2px;
   outline: none;
   font-family: inherit;
+  min-width: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .add-course-btn {
@@ -467,34 +470,23 @@ html, body, #root {
 
 .title-row { margin-bottom: 24px; }
 
-.course-title {
+.course-title-input {
   font-size: 26px;
   font-weight: 800;
   letter-spacing: -0.7px;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
   color: var(--text);
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  border-radius: var(--radius-sm);
-  transition: color 0.12s;
-}
-.course-title:hover { color: var(--accent); }
-
-
-.title-edit {
-  font-size: 26px;
-  font-weight: 800;
   background: none;
   border: none;
-  border-bottom: 2.5px solid var(--accent);
-  color: var(--text);
+  border-bottom: 2px solid transparent;
   outline: none;
-  letter-spacing: -0.7px;
-  max-width: 500px;
   font-family: inherit;
+  width: 100%;
+  padding: 0;
+  transition: border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.course-title-input:focus {
+  border-bottom-color: var(--accent);
 }
 
 /* ── Summary Grid ─────────────────────────────────────────────────── */
@@ -1037,7 +1029,7 @@ input[type=number] { -moz-appearance: textfield; }
   .print-btn { margin-left: 0; }
 
   /* Course title */
-  .course-title { font-size: 20px; }
+  .course-title-input { font-size: 20px; }
 }
 
 @media (max-width: 400px) {
@@ -1093,5 +1085,5 @@ input[type=number] { -moz-appearance: textfield; }
   }
   .s-lbl, .s-sub, .s-unit, .s-val { color: #333 !important; }
   .s-grade { color: #000 !important; font-size: 40px !important; }
-  .course-title { color: #000 !important; }
+  .course-title-input { color: #000 !important; background: #fff !important; border-bottom-color: #ccc !important; }
 }

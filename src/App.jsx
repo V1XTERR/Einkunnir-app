@@ -628,7 +628,6 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [data, setData] = useState(loadData)
   const [activeId, setActiveId] = useState(() => loadData().courses[0]?.id)
-  const [editingId, setEditingId] = useState(null)
   const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark')
 
   useEffect(() => {
@@ -695,33 +694,24 @@ export default function App() {
             {data.courses.map(c => {
               const stats = calcCourse(c)
               const isActive = c.id === activeId
-              const isEditing = editingId === c.id
-              if (isEditing) {
-                return (
-                  <div key={c.id} className="c-item active">
-                    <span className="c-dot" style={{ background: c.color || '#3DDC97' }} />
-                    <input
-                      className="c-name-edit"
-                      ref={el => { if (el) setTimeout(() => { el.focus(); el.select() }, 50) }}
-                      value={c.name}
-                      onChange={e => renameCourse(c.id, e.target.value)}
-                      onBlur={() => setEditingId(null)}
-                      onKeyDown={e => e.key === 'Enter' && setEditingId(null)}
-                    />
-                  </div>
-                )
-              }
               return (
                 <div
                   key={c.id}
                   className={`c-item${isActive ? ' active' : ''}`}
-                  onClick={() => {
-                    if (isActive) { setEditingId(c.id) }
-                    else { setActiveId(c.id); setSidebarOpen(false) }
-                  }}
+                  onClick={() => { setActiveId(c.id); setSidebarOpen(false) }}
                 >
                   <span className="c-dot" style={{ background: c.color || '#3DDC97' }} />
-                  <span className="c-name">{c.name}</span>
+                  {isActive ? (
+                    <input
+                      className="c-name-inline"
+                      value={c.name}
+                      onChange={e => renameCourse(c.id, e.target.value)}
+                      onClick={e => e.stopPropagation()}
+                      onKeyDown={e => e.key === 'Enter' && e.target.blur()}
+                    />
+                  ) : (
+                    <span className="c-name">{c.name}</span>
+                  )}
                   <span className="c-grade" style={{ color: gradeColor(stats.currentAvg) }}>
                     {stats.currentAvg !== null ? fmt(stats.currentAvg, 1) : '—'}
                   </span>
@@ -739,20 +729,12 @@ export default function App() {
           {activeCourse && (
             <>
               <div className="title-row">
-                {editingId === activeCourse.id ? (
-                  <input
-                    className="title-edit"
-                    ref={el => { if (el) setTimeout(() => { el.focus(); el.select() }, 50) }}
-                    value={activeCourse.name}
-                    onChange={e => renameCourse(activeCourse.id, e.target.value)}
-                    onBlur={() => setEditingId(null)}
-                    onKeyDown={e => e.key === 'Enter' && setEditingId(null)}
-                  />
-                ) : (
-                  <h2 className="course-title" onClick={() => setEditingId(activeCourse.id)}>
-                    {activeCourse.name}
-                  </h2>
-                )}
+                <input
+                  className="course-title-input"
+                  value={activeCourse.name}
+                  onChange={e => renameCourse(activeCourse.id, e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && e.target.blur()}
+                />
               </div>
               <CoursePage course={activeCourse} onChange={updateCourse} />
             </>

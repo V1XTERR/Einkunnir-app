@@ -375,6 +375,7 @@ html, body, #root {
   position: relative;
 }
 .c-item:hover { background: var(--surface2); }
+.c-item.active { cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .c-item.active {
   background: var(--accent-dim);
 }
@@ -424,21 +425,6 @@ html, body, #root {
 .c-item:hover .c-del { display: block; }
 .c-del:hover { color: var(--fail); background: var(--fail-light); }
 
-.c-edit {
-  background: none;
-  border: none;
-  color: var(--text-faint);
-  cursor: pointer;
-  font-size: 14px;
-  line-height: 1;
-  padding: 12px 10px;   /* 44px touch area */
-  margin: -12px -6px -12px 0;
-  border-radius: 3px;
-  transition: color 0.1s, background 0.1s;
-  flex-shrink: 0;
-  touch-action: manipulation;
-}
-.c-edit:hover { color: var(--accent); background: var(--accent-dim); }
 
 .c-name-edit {
   flex: 1;
@@ -488,25 +474,15 @@ html, body, #root {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  cursor: default;
-  color: var(--text);
-}
-
-.title-edit-btn {
-  background: none;
-  border: none;
-  font-size: 16px;
-  color: var(--text-faint);
   cursor: pointer;
-  padding: 10px 12px;   /* 44px touch area */
-  margin: -10px -8px;
-  border-radius: var(--radius-sm);
-  line-height: 1;
-  transition: color 0.12s, background 0.12s;
-  flex-shrink: 0;
+  color: var(--text);
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: var(--radius-sm);
+  transition: color 0.12s;
 }
-.title-edit-btn:hover { color: var(--accent); background: var(--accent-dim); }
+.course-title:hover { color: var(--accent); }
+
 
 .title-edit {
   font-size: 26px;

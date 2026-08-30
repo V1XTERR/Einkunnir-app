@@ -712,15 +712,19 @@ export default function App() {
                 )
               }
               return (
-                <div key={c.id} className={`c-item${isActive ? ' active' : ''}`} onClick={() => { setActiveId(c.id); setSidebarOpen(false) }}>
+                <div
+                  key={c.id}
+                  className={`c-item${isActive ? ' active' : ''}`}
+                  onClick={() => {
+                    if (isActive) { setEditingId(c.id) }
+                    else { setActiveId(c.id); setSidebarOpen(false) }
+                  }}
+                >
                   <span className="c-dot" style={{ background: c.color || '#3DDC97' }} />
                   <span className="c-name">{c.name}</span>
                   <span className="c-grade" style={{ color: gradeColor(stats.currentAvg) }}>
                     {stats.currentAvg !== null ? fmt(stats.currentAvg, 1) : '—'}
                   </span>
-                  {isActive && (
-                    <button className="c-edit" onClick={e => { e.stopPropagation(); setEditingId(c.id) }}>✎</button>
-                  )}
                   {data.courses.length > 1 && (
                     <button className="c-del" onClick={e => { e.stopPropagation(); deleteCourse(c.id) }}>×</button>
                   )}
@@ -745,9 +749,8 @@ export default function App() {
                     onKeyDown={e => e.key === 'Enter' && setEditingId(null)}
                   />
                 ) : (
-                  <h2 className="course-title">
+                  <h2 className="course-title" onClick={() => setEditingId(activeCourse.id)}>
                     {activeCourse.name}
-                    <button className="title-edit-btn" onClick={() => setEditingId(activeCourse.id)}>✎</button>
                   </h2>
                 )}
               </div>

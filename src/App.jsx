@@ -695,27 +695,31 @@ export default function App() {
             {data.courses.map(c => {
               const stats = calcCourse(c)
               const isActive = c.id === activeId
-              return (
-                <div key={c.id} className={`c-item ${isActive ? 'active' : ''}`} onClick={() => { setActiveId(c.id); setSidebarOpen(false) }}>
-                  {editingId === c.id ? (
+              const isEditing = editingId === c.id
+              if (isEditing) {
+                return (
+                  <div key={c.id} className="c-item active">
+                    <span className="c-dot" style={{ background: c.color || '#3DDC97' }} />
                     <input
-                      className="c-name-edit" autoFocus value={c.name}
+                      className="c-name-edit"
+                      ref={el => { if (el) setTimeout(() => { el.focus(); el.select() }, 50) }}
+                      value={c.name}
                       onChange={e => renameCourse(c.id, e.target.value)}
                       onBlur={() => setEditingId(null)}
                       onKeyDown={e => e.key === 'Enter' && setEditingId(null)}
-                      onClick={e => e.stopPropagation()}
                     />
-                  ) : (
-                    <>
-                      <span className="c-dot" style={{ background: c.color || '#3DDC97' }} />
-                      <span className="c-name">{c.name}</span>
-                      <span className="c-grade" style={{ color: gradeColor(stats.currentAvg) }}>
-                        {stats.currentAvg !== null ? fmt(stats.currentAvg, 1) : '—'}
-                      </span>
-                      {isActive && (
-                        <button className="c-edit" onClick={e => { e.stopPropagation(); setEditingId(c.id) }} title="Endurnefna">✎</button>
-                      )}
-                    </>
+                  </div>
+                )
+              }
+              return (
+                <div key={c.id} className={`c-item${isActive ? ' active' : ''}`} onClick={() => { setActiveId(c.id); setSidebarOpen(false) }}>
+                  <span className="c-dot" style={{ background: c.color || '#3DDC97' }} />
+                  <span className="c-name">{c.name}</span>
+                  <span className="c-grade" style={{ color: gradeColor(stats.currentAvg) }}>
+                    {stats.currentAvg !== null ? fmt(stats.currentAvg, 1) : '—'}
+                  </span>
+                  {isActive && (
+                    <button className="c-edit" onClick={e => { e.stopPropagation(); setEditingId(c.id) }}>✎</button>
                   )}
                   {data.courses.length > 1 && (
                     <button className="c-del" onClick={e => { e.stopPropagation(); deleteCourse(c.id) }}>×</button>
@@ -733,7 +737,9 @@ export default function App() {
               <div className="title-row">
                 {editingId === activeCourse.id ? (
                   <input
-                    className="title-edit" autoFocus value={activeCourse.name}
+                    className="title-edit"
+                    ref={el => { if (el) setTimeout(() => { el.focus(); el.select() }, 50) }}
+                    value={activeCourse.name}
                     onChange={e => renameCourse(activeCourse.id, e.target.value)}
                     onBlur={() => setEditingId(null)}
                     onKeyDown={e => e.key === 'Enter' && setEditingId(null)}
@@ -741,7 +747,7 @@ export default function App() {
                 ) : (
                   <h2 className="course-title">
                     {activeCourse.name}
-                    <button className="title-edit-btn" onClick={() => setEditingId(activeCourse.id)} title="Endurnefna">✎</button>
+                    <button className="title-edit-btn" onClick={() => setEditingId(activeCourse.id)}>✎</button>
                   </h2>
                 )}
               </div>

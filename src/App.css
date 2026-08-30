@@ -101,7 +101,13 @@ html, body, #root {
 }
 
 /* ── App Shell ────────────────────────────────────────────────────── */
-.app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh; /* fixes iOS Safari address-bar shrink */
+  overflow: hidden;
+}
 
 /* ── Header ───────────────────────────────────────────────────────── */
 .app-hdr {
@@ -423,12 +429,14 @@ html, body, #root {
   border: none;
   color: var(--text-faint);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1;
-  padding: 3px 4px;
+  padding: 12px 10px;   /* 44px touch area */
+  margin: -12px -6px -12px 0;
   border-radius: 3px;
   transition: color 0.1s, background 0.1s;
   flex-shrink: 0;
+  touch-action: manipulation;
 }
 .c-edit:hover { color: var(--accent); background: var(--accent-dim); }
 
@@ -465,6 +473,8 @@ html, body, #root {
 .content {
   flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   padding: 32px 36px;
   background: var(--bg);
 }
@@ -488,11 +498,13 @@ html, body, #root {
   font-size: 16px;
   color: var(--text-faint);
   cursor: pointer;
-  padding: 4px 6px;
+  padding: 10px 12px;   /* 44px touch area */
+  margin: -10px -8px;
   border-radius: var(--radius-sm);
   line-height: 1;
   transition: color 0.12s, background 0.12s;
   flex-shrink: 0;
+  touch-action: manipulation;
 }
 .title-edit-btn:hover { color: var(--accent); background: var(--accent-dim); }
 

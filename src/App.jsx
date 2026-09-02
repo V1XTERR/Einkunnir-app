@@ -424,6 +424,84 @@ function AssessmentCard({ a, isExcluded, onUpdate, onDelete, onDuplicate }) {
   )
 }
 
+// ── PROFILE MODAL ──────────────────────────────────────────────────
+function ProfileModal({ user, onClose }) {
+  const [displayName, setDisplayName] = useState(user.user_metadata?.display_name || '')
+  const [avatarUrl, setAvatarUrl]     = useState(user.user_metadata?.avatar_url   || null)
+  const [uploading, setUploading]     = useState(false)
+  const [saving, setSaving]           = useState(false)
+  const [msg, setMsg]                 = useState('')
+  const fileRef = useRef(null)
+
+  const initial = ((displayName || user.email) ?? '?')[0].toUpperCase()
+
+  async function handleSave() {
+    setSaving(true); setMsg('')
+    const { error } = await supabase.auth.updateUser({ data: { display_name: displayName } })
+    setMsg(error ? error.message : 'Vistað!')
+    setSaving(false)
+    setTimeout(() => setMsg(''), 2200)
+  }
+
+  async function handleAvatarChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true); setMsg('')
+    const ext  = file.name.split('.').pop().toLowerCase()
+    const path = `${user.id}/avatar.${ext}`
+    const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
+    if (error) { setMsg('Villa: ' + error.message); setUploading(false); return }
+    const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+    const url = data.publicUrl + '?t=' + Date.now()
+    await supabase.auth.updateUser({ data: { avatar_url: url } })
+    setAvatarUrl(url)
+    setMsg('Mynd uppfærð!')
+    setUploading(false)
+    setTimeout(() => setMsg(''), 2200)
+  }
+
+  return (
+    <div className="profile-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="profile-modal">
+        <div className="profile-modal-hdr">
+          <span className="profile-modal-title">STILLINGAR // AÐGANGUR</span>
+          <button className="profile-modal-close" onClick={onClose}>×</button>
+        </div>
+
+        <div className="profile-avatar-section">
+          <div className="profile-avatar-lg" onClick={() => fileRef.current?.click()} title="Skipta um mynd">
+            {avatarUrl
+              ? <img src={avatarUrl} alt="" className="profile-avatar-img" />
+              : <span>{initial}</span>}
+            <div className="profile-avatar-hover">{uploading ? '…' : '↑'}</div>
+          </div>
+          <input ref={fileRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handleAvatarChange} />
+          <div className="profile-avatar-hint">Smelltu á mynd til að skipta</div>
+        </div>
+
+        <div className="form-field">
+          <label className="form-label">Nafn</label>
+          <input className="form-input" value={displayName} onChange={e => setDisplayName(e.target.value)}
+            placeholder={user.email} onKeyDown={e => e.key === 'Enter' && handleSave()} />
+        </div>
+        <div className="form-field">
+          <label className="form-label">Tölvupóstur</label>
+          <input className="form-input" value={user.email} disabled style={{ opacity: 0.45 }} />
+        </div>
+
+        {msg && <div className={`profile-msg${msg.startsWith('V') ? ' ok' : ' err'}`}>{msg}</div>}
+
+        <div className="profile-modal-actions">
+          <button className="login-guest-btn" style={{ flex:1, width:'auto' }} onClick={handleSave} disabled={saving}>
+            {saving ? 'Vistar…' : 'Vista'}
+          </button>
+          <button className="btn-outline" onClick={onClose}>Loka</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── LOGO MARK ──────────────────────────────────────────────────────
 function LogoMark({ fill = '#0a0a0a', accent = '#ec3013', size = 18 }) {
   const h = size
@@ -439,7 +517,7 @@ function LogoMark({ fill = '#0a0a0a', accent = '#ec3013', size = 18 }) {
 }
 
 // ── TOP NAV ────────────────────────────────────────────────────────
-function TopNav({ page, onNav, loggedIn, sessionAvg, supaUser, onLogout }) {
+function TopNav({ page, onNav, loggedIn, sessionAvg, supaUser, onLogout, onProfile }) {
   const TABS = [
     { key: 'forsida',    label: 'Forsíða' },
     { key: 'innskraning', label: 'Innskráning', hideWhen: loggedIn },
@@ -467,9 +545,19 @@ function TopNav({ page, onNav, loggedIn, sessionAvg, supaUser, onLogout }) {
       </div>
       {loggedIn && (
         <div className="top-nav-session">
-          {supaUser ? supaUser.email.split('@')[0].toUpperCase() : 'GESTUR'}
+          {supaUser
+            ? (supaUser.user_metadata?.display_name || supaUser.email.split('@')[0]).toUpperCase()
+            : 'GESTUR'}
           {sessionAvg !== null ? ` // ${fmt(sessionAvg, 2)}` : ''}
         </div>
+      )}
+      {supaUser && onProfile && (
+        <button className="top-nav-avatar" onClick={onProfile} title="Stillingar">
+          {supaUser.user_metadata?.avatar_url
+            ? <img src={supaUser.user_metadata.avatar_url} className="top-nav-avatar-img" alt="" />
+            : ((supaUser.user_metadata?.display_name || supaUser.email) ?? '?')[0].toUpperCase()
+          }
+        </button>
       )}
       {loggedIn && onLogout && (
         <button className="top-nav-logout" onClick={onLogout}>ÚTSKRÁ</button>
@@ -875,7 +963,6 @@ function AfangarPage({ data, setData, activeId, setActiveId, onOpenCalc, onImpor
     setActiveId(c.id)
   }
   function deleteCourse(id) {
-    if (data.courses.length <= 1) return
     const target = data.courses.find(c => c.id === id)
     const n = target?.assessments?.length ?? 0
     const msg = `Eyða áfanganum „${target?.name}"?\n\n${n > 0 ? `Allir ${n} matar verða einnig eytt.` : 'Áfanginn er tómur.'}`
@@ -908,6 +995,9 @@ function AfangarPage({ data, setData, activeId, setActiveId, onOpenCalc, onImpor
           <div className="afangar-panel-title">Áfangar // {data.courses.length} skráðir</div>
         </div>
         <div className="afangar-list">
+          {data.courses.length === 0 && (
+            <div className="afangar-list-empty">Engir áfangar enn — bættu við hér að neðan.</div>
+          )}
           {data.courses.map(c => {
             const s = calcCourse(c)
             const isActive = c.id === activeId
@@ -920,13 +1010,11 @@ function AfangarPage({ data, setData, activeId, setActiveId, onOpenCalc, onImpor
                 <span className="afangar-item-grade" style={{ color: gradeColor(s.currentAvg) }}>
                   {s.currentAvg !== null ? fmt(s.currentAvg, 1) : '—'}
                 </span>
-                {data.courses.length > 1 && (
-                  <button
-                    className="afangar-del-btn"
-                    onClick={e => { e.stopPropagation(); deleteCourse(c.id) }}
-                    aria-label="Eyða"
-                  >×</button>
-                )}
+                <button
+                  className="afangar-del-btn"
+                  onClick={e => { e.stopPropagation(); deleteCourse(c.id) }}
+                  aria-label="Eyða"
+                >×</button>
               </div>
             )
           })}
@@ -972,8 +1060,8 @@ function AfangarPage({ data, setData, activeId, setActiveId, onOpenCalc, onImpor
             </div>
           </>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--faint)', fontFamily: 'var(--mono)', fontSize: 12 }}>
-            Veldu áfanga til vinstri
+          <div className="afangar-no-select">
+            {data.courses.length === 0 ? 'Bættu við áfanga til að byrja.' : 'Veldu áfanga til vinstri.'}
           </div>
         )}
       </div>
@@ -1263,7 +1351,8 @@ export default function App() {
   const [activeId, setActiveId] = useState(() => loadData().courses[0]?.id)
   const [showImport, setShowImport] = useState(false)
   const [importToast, setImportToast] = useState(null)
-  const [supaUser, setSupaUser] = useState(null)
+  const [supaUser, setSupaUser]       = useState(null)
+  const [showProfile, setShowProfile] = useState(false)
 
   useEffect(() => { saveData(data) }, [data])
   useEffect(() => {
@@ -1280,6 +1369,8 @@ export default function App() {
         setSupaUser(user); setLoggedIn(true); setPage('afangar'); loadSupaData(user.id)
       } else if (event === 'SIGNED_OUT') {
         setSupaUser(null); setLoggedIn(false); setPage('forsida'); setData(loadData())
+      } else if (event === 'USER_UPDATED') {
+        setSupaUser(user)
       }
     })
     return () => subscription.unsubscribe()
@@ -1299,6 +1390,10 @@ export default function App() {
     if (row?.courses?.length) {
       setData({ courses: row.courses })
       setActiveId(row.courses[0]?.id)
+    } else {
+      // New account — start clean, no default course
+      setData({ courses: [] })
+      setActiveId(null)
     }
   }
 
@@ -1359,7 +1454,8 @@ export default function App() {
 
   return (
     <div className="app">
-      <TopNav page={page} onNav={handleNav} loggedIn={loggedIn} sessionAvg={sessionAvg} supaUser={supaUser} onLogout={supaUser ? handleLogout : null} />
+      <TopNav page={page} onNav={handleNav} loggedIn={loggedIn} sessionAvg={sessionAvg} supaUser={supaUser} onLogout={supaUser ? handleLogout : null} onProfile={supaUser ? () => setShowProfile(true) : null} />
+      {showProfile && supaUser && <ProfileModal user={supaUser} onClose={() => setShowProfile(false)} />}
 
       {page === 'forsida' && (
         <ForsidaPage

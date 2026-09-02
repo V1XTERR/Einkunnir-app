@@ -716,6 +716,140 @@ html, body, #root {
 }
 
 /* ══════════════════════════════════════════════════════════════════════
+   PROFILE MODAL
+══════════════════════════════════════════════════════════════════════ */
+.profile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,10,10,0.78);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-modal {
+  background: var(--ink-2);
+  border: 1px solid var(--rule-strong);
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  padding: 28px;
+}
+
+.profile-modal-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.profile-modal-title {
+  font-size: 10px;
+  font-weight: 800;
+  font-family: var(--mono);
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.profile-modal-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 22px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+.profile-modal-close:hover { color: var(--text); }
+
+.profile-avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.profile-avatar-lg {
+  width: 80px;
+  height: 80px;
+  background: var(--ink-3);
+  border: 1px solid var(--rule-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--text);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-avatar-hover {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  font-size: 22px;
+  color: #fff;
+  transition: opacity 0.14s;
+}
+.profile-avatar-lg:hover .profile-avatar-hover { opacity: 1; }
+
+.profile-avatar-hint {
+  font-size: 11px;
+  color: var(--faint);
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+}
+
+.profile-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.profile-msg {
+  font-size: 12px;
+  font-family: var(--mono);
+  margin-top: 8px;
+  font-weight: 700;
+}
+.profile-msg.ok  { color: var(--pass); }
+.profile-msg.err { color: var(--accent-hot); }
+
+/* Navbar avatar button */
+.top-nav-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin: auto 10px;
+  border: 1px solid var(--rule-strong);
+  background: var(--ink-3);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: border-color 0.12s;
+}
+.top-nav-avatar:hover { border-color: var(--accent); }
+.top-nav-avatar-img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ══════════════════════════════════════════════════════════════════════
    ÁFANGAR — COURSES PAGE
 ══════════════════════════════════════════════════════════════════════ */
 .afangar {
@@ -797,6 +931,24 @@ html, body, #root {
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
 }
+.afangar-list-empty {
+  padding: 28px 18px;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--faint);
+  line-height: 1.5;
+}
+
+.afangar-no-select {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
 .afangar-del-btn {
   background: none;
   border: none;

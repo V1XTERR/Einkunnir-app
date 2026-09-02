@@ -1409,12 +1409,20 @@ export default function App() {
   }, [data.courses, supaUser])
 
   async function loadSupaData(userId) {
-    const { data: row } = await supabase.from('user_data').select('courses').eq('id', userId).single()
+    const { data: row, error } = await supabase.from('user_data').select('courses').eq('id', userId).single()
+    if (error) {
+      // PGRST116 = no row yet (new user) — start clean
+      // anything else = network/table error — keep localStorage data
+      if (error.code === 'PGRST116') {
+        setData({ courses: [] })
+        setActiveId(null)
+      }
+      return
+    }
     if (row?.courses?.length) {
       setData({ courses: row.courses })
       setActiveId(row.courses[0]?.id)
     } else {
-      // New account — start clean, no default course
       setData({ courses: [] })
       setActiveId(null)
     }

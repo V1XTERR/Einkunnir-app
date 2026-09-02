@@ -1387,7 +1387,7 @@ export default function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const user = session?.user ?? null
       if (event === 'INITIAL_SESSION') {
-        if (user) { setSupaUser(user); setLoggedIn(true); loadSupaData(user.id) }
+        if (user) { setSupaUser(user); setLoggedIn(true); setPage('afangar'); loadSupaData(user.id) }
       } else if (event === 'SIGNED_IN') {
         setSupaUser(user); setLoggedIn(true); setPage('afangar'); loadSupaData(user.id)
       } else if (event === 'SIGNED_OUT') {

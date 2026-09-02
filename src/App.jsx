@@ -567,7 +567,7 @@ function TopNav({ page, onNav, loggedIn, sessionAvg, supaUser, onLogout, onProfi
 }
 
 // ── FORSÍÐA ────────────────────────────────────────────────────────
-function ForsidaPage({ onLogin, onDemoLogin }) {
+function ForsidaPage({ onLogin }) {
   const grades = [8, 7, 6, 4.5, 9, 5, 3, 8.5, 7, 6.5, 4, 9, 7, 5, 8, 6, 4, 9]
 
   return (
@@ -601,8 +601,7 @@ function ForsidaPage({ onLogin, onDemoLogin }) {
               ))}
             </div>
             <div className="forsida-cta-row">
-              <button className="btn-primary" onClick={onLogin}>Skrá inn →</button>
-              <button className="btn-outline" onClick={onDemoLogin}>Demo</button>
+              <button className="btn-primary" onClick={onLogin}>SKRÁ INN →</button>
             </div>
           </div>
           <div className="forsida-spec-col">
@@ -653,6 +652,7 @@ function InnskraningPage({ onLogin }) {
   const [mode, setMode]       = useState('login')
   const [email, setEmail]     = useState('')
   const [password, setPass]   = useState('')
+  const [showPass, setShowPass] = useState(false)
   const [error, setError]     = useState('')
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
@@ -704,7 +704,12 @@ function InnskraningPage({ onLogin }) {
           {mode !== 'reset' && (
             <div className="form-field">
               <label className="form-label">Lykilorð</label>
-              <input className="form-input" type="password" value={password} onChange={e => setPass(e.target.value)} placeholder="••••••••" required minLength={6} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
+              <div className="pass-wrap">
+                <input className="form-input" type={showPass ? 'text' : 'password'} value={password} onChange={e => setPass(e.target.value)} placeholder="••••••••" required minLength={6} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
+                <button type="button" className="pass-toggle" onClick={() => setShowPass(v => !v)} tabIndex={-1}>
+                  {showPass ? '🙈' : '👁'}
+                </button>
+              </div>
             </div>
           )}
           {error   && <div className="login-error">{error}</div>}
@@ -1420,11 +1425,6 @@ export default function App() {
     setPage('afangar')
   }
 
-  function handleDemoLogin() {
-    setLoggedIn(true)
-    setPage('afangar')
-  }
-
   async function handleLogout() {
     await supabase.auth.signOut()
   }
@@ -1478,7 +1478,6 @@ export default function App() {
       {page === 'forsida' && (
         <ForsidaPage
           onLogin={() => setPage('innskraning')}
-          onDemoLogin={handleDemoLogin}
         />
       )}
 

@@ -1399,33 +1399,57 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Auto-save courses to Supabase when logged in
+  // User-specific localStorage key — backup so data survives Supabase hiccups
+  const userKey = supaUser ? `einkunnabok_u_${supaUser.id}` : null
+
+  // Save to user-specific localStorage immediately on every change
+  useEffect(() => {
+    if (!userKey) return
+    try { localStorage.setItem(userKey, JSON.stringify(data.courses)) } catch {}
+  }, [data.courses, userKey])
+
+  // Auto-save to Supabase (debounced 600ms)
   useEffect(() => {
     if (!supaUser) return
     const t = setTimeout(() => {
       supabase.from('user_data').upsert({ id: supaUser.id, courses: data.courses, updated_at: new Date().toISOString() })
-    }, 900)
+    }, 600)
     return () => clearTimeout(t)
   }, [data.courses, supaUser])
 
+  // Save immediately when tab closes
+  useEffect(() => {
+    if (!supaUser || !userKey) return
+    function onUnload() {
+      try { localStorage.setItem(userKey, JSON.stringify(data.courses)) } catch {}
+    }
+    window.addEventListener('beforeunload', onUnload)
+    return () => window.removeEventListener('beforeunload', onUnload)
+  }, [supaUser, userKey, data.courses])
+
   async function loadSupaData(userId) {
     const { data: row, error } = await supabase.from('user_data').select('courses').eq('id', userId).single()
-    if (error) {
-      // PGRST116 = no row yet (new user) — start clean
-      // anything else = network/table error — keep localStorage data
-      if (error.code === 'PGRST116') {
-        setData({ courses: [] })
-        setActiveId(null)
-      }
-      return
-    }
-    if (row?.courses?.length) {
+    const localKey = `einkunnabok_u_${userId}`
+
+    if (!error && row?.courses?.length) {
+      // Supabase has data — use it as source of truth
       setData({ courses: row.courses })
       setActiveId(row.courses[0]?.id)
-    } else {
-      setData({ courses: [] })
-      setActiveId(null)
+      localStorage.setItem(localKey, JSON.stringify(row.courses))
+    } else if (error?.code === 'PGRST116') {
+      // No Supabase row — check user-specific local backup
+      try {
+        const backup = localStorage.getItem(localKey)
+        if (backup) {
+          const courses = JSON.parse(backup)
+          setData({ courses }); setActiveId(courses[0]?.id)
+        } else {
+          // Truly new user — start clean
+          setData({ courses: [] }); setActiveId(null)
+        }
+      } catch { setData({ courses: [] }); setActiveId(null) }
     }
+    // Other errors (network etc.) — keep current data unchanged
   }
 
   function handleLogin() {

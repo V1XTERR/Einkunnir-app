@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import { ImportWizard } from './ImportWizard'
 import DNAHelix from './DNAHelix'
+import BlackHole from './uploads/BlackHole'
 
 // ── Constants ──────────────────────────────────────────────────────
 const STORAGE_KEY = 'einkunnabok_v1'
@@ -422,6 +423,20 @@ function AssessmentCard({ a, isExcluded, onUpdate, onDelete, onDuplicate }) {
   )
 }
 
+// ── LOGO MARK ──────────────────────────────────────────────────────
+function LogoMark({ fill = '#0a0a0a', accent = '#ec3013', size = 18 }) {
+  const h = size
+  const w = Math.round(size * 22 / 18)
+  return (
+    <svg width={w} height={h} viewBox="0 0 22 18" fill="none" aria-hidden="true">
+      <rect x="0"  y="12" width="4" height="6"  fill={fill}/>
+      <rect x="6"  y="8"  width="4" height="10" fill={fill}/>
+      <rect x="12" y="3"  width="4" height="15" fill={accent}/>
+      <rect x="18" y="0"  width="4" height="18" fill={fill}/>
+    </svg>
+  )
+}
+
 // ── TOP NAV ────────────────────────────────────────────────────────
 function TopNav({ page, onNav, loggedIn, sessionAvg }) {
   const TABS = [
@@ -435,7 +450,8 @@ function TopNav({ page, onNav, loggedIn, sessionAvg }) {
   return (
     <nav className="top-nav">
       <div className="top-nav-brand">
-        einkunnir <span className="top-nav-version">v.02</span>
+        <LogoMark fill="#f3f2f2" size={15}/>
+        EINKUNNIR.IS
       </div>
       <div className="top-nav-tabs">
         {TABS.map(t => (
@@ -466,8 +482,12 @@ function ForsidaPage({ onLogin, onDemoLogin }) {
       <div className="forsida-grain" />
       <div className="forsida-left">
         <div className="forsida-title-block">
-          <div className="forsida-title-prefix">≋≋</div>
-          <h1 className="forsida-headline">einkunnir<br />reiknivél</h1>
+          <div className="forsida-logo-mark">
+            <LogoMark fill="#0a0a0a" size={28}/>
+          </div>
+          <h1 className="forsida-headline">EINKUNNIR.IS</h1>
+          <p className="forsida-tagline">Reiknaðu út hvar þú stendur.</p>
+          <p className="forsida-tagline-sub">Skráðu námsmat, fylgstu með stöðunni og sjáðu hvað þú þarft úr því sem eftir er.</p>
         </div>
         <div className="forsida-lower">
           <div className="forsida-features-col">
@@ -517,12 +537,19 @@ function ForsidaPage({ onLogin, onDemoLogin }) {
           </div>
         </div>
       </div>
-      <div className="forsida-ghost-strip">einkunnir reiknivél · einkunnir reiknivél · einkunnir reiknivél · einkunnir reiknivél · einkunnir reiknivél</div>
+      <div className="forsida-ghost-strip" aria-hidden="true">
+        <span className="forsida-ghost-inner">
+          EINKUNNIR.IS · SKRÁÐU · REIKNAÐU · SJÁÐU STÖÐUNA ·&ensp;&ensp;
+          EINKUNNIR.IS · SKRÁÐU · REIKNAÐU · SJÁÐU STÖÐUNA ·&ensp;&ensp;
+          EINKUNNIR.IS · SKRÁÐU · REIKNAÐU · SJÁÐU STÖÐUNA ·&ensp;&ensp;
+        </span>
+      </div>
       <footer className="forsida-footer">
         <span>◎ EINKUNNIR.IS</span>
-        <span>≋ TÖLVUNARFRÆÐI</span>
+        <span>TÖLVUNARFRÆÐI</span>
         <span>NÁMSMATSKERFI</span>
         <span>2026</span>
+        <span>v.02</span>
       </footer>
     </div>
   )
@@ -535,9 +562,13 @@ function InnskraningPage({ onLogin }) {
   return (
     <div className="innskraning">
       <div className="innskraning-helix">
-        <DNAHelix tone="dark" accent="#ec3013" marks={helixMarks} speed={22} radius={1.15} turns={3.2} thickness={1} />
+        <BlackHole tone="dark" accent="#ec3013" speed={1.2} lobeIntensity={0.5} />
       </div>
       <div className="innskraning-form-wrap">
+        <div className="innskraning-brand">
+          <LogoMark fill="#f3f2f2" size={16}/>
+          <span>EINKUNNIR.IS</span>
+        </div>
         <div className="innskraning-kicker">// ACCESS_01</div>
         <h1 className="innskraning-title">Innskráning</h1>
 

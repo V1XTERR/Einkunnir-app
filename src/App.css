@@ -32,7 +32,7 @@ html, body, #root {
   background: var(--ink);
   color: var(--text);
   font-family: var(--font);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
@@ -53,7 +53,7 @@ html, body, #root {
 .top-nav {
   display: flex;
   align-items: stretch;
-  height: 44px;
+  height: 48px;
   background: var(--ink-2);
   border-bottom: 1px solid var(--rule);
   flex-shrink: 0;
@@ -66,21 +66,15 @@ html, body, #root {
 .top-nav-brand {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 20px 0 18px;
+  gap: 8px;
+  padding: 0 22px 0 18px;
   font-size: 13px;
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   color: var(--text);
   border-right: 1px solid var(--rule);
   white-space: nowrap;
   flex-shrink: 0;
-}
-.top-nav-version {
-  font-size: 10px;
-  font-weight: 400;
-  font-family: var(--mono);
-  color: var(--muted);
 }
 
 .top-nav-tabs {
@@ -91,11 +85,11 @@ html, body, #root {
 .top-nav-tab {
   display: flex;
   align-items: center;
-  padding: 0 18px;
-  font-size: 11px;
-  font-weight: 800;
+  padding: 0 20px;
+  font-size: 13px;
+  font-weight: 700;
   font-family: var(--font);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--muted);
   cursor: pointer;
@@ -116,7 +110,7 @@ html, body, #root {
   content: '';
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 2px;
+  height: 3px;
   background: var(--accent);
 }
 
@@ -124,10 +118,10 @@ html, body, #root {
   display: flex;
   align-items: center;
   padding: 0 18px;
-  font-size: 10px;
-  font-weight: 800;
+  font-size: 11px;
+  font-weight: 700;
   font-family: var(--mono);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   color: var(--muted);
   white-space: nowrap;
   border-left: 1px solid var(--rule);
@@ -175,41 +169,53 @@ html, body, #root {
 }
 
 .forsida-title-block {
-  margin-bottom: 48px;
+  margin-bottom: 36px;
 }
 
-.forsida-title-prefix {
-  font-size: 92px;
-  font-weight: 800;
-  letter-spacing: -0.12em;
-  line-height: 1;
-  opacity: 0.92;
-  color: var(--text-dark);
-  font-variant-numeric: tabular-nums;
-  margin-bottom: -16px;
+.forsida-logo-mark {
+  margin-bottom: 18px;
 }
 
 .forsida-headline {
-  font-size: clamp(52px, 7vw, 104px);
+  font-size: clamp(46px, 6.2vw, 92px);
   font-weight: 800;
   letter-spacing: -0.055em;
-  line-height: 0.88;
+  line-height: 0.90;
   color: var(--text-dark);
-  text-transform: lowercase;
+  text-transform: uppercase;
+}
+
+.forsida-tagline {
+  font-size: clamp(17px, 2vw, 26px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--text-dark);
+  margin-top: 14px;
+}
+
+.forsida-tagline-sub {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--muted-dk);
+  line-height: 1.55;
+  margin-top: 10px;
+  max-width: 440px;
 }
 
 .forsida-lower {
   display: grid;
-  grid-template-columns: minmax(240px, 300px) minmax(200px, 1fr);
-  gap: 36px;
+  grid-template-columns: minmax(220px, 300px) minmax(170px, 240px);
+  gap: 28px;
   flex: 1;
+  align-items: start;
 }
 
 .forsida-kicker {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
   font-family: var(--mono);
-  letter-spacing: 0.18em;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
   color: var(--muted-dk);
   margin-bottom: 16px;
@@ -224,47 +230,49 @@ html, body, #root {
 .forsida-feature {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 11px 0;
+  gap: 3px;
+  padding: 13px 0;
   border-bottom: 1px solid var(--rule-lt);
 }
 .forsida-feature-key {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
   font-family: var(--mono);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   color: var(--accent);
 }
 .forsida-feature-val {
-  font-size: 12px;
+  font-size: 15px;
   color: var(--muted-dk);
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .forsida-spec-col {
   display: flex;
   flex-direction: column;
   gap: 0;
+  border-left: 1px solid var(--rule-lt);
+  padding-left: 22px;
 }
 .forsida-spec-block {
-  padding: 11px 0;
+  padding: 12px 0;
   border-bottom: 1px solid var(--rule-lt);
-  text-align: right;
+  text-align: left;
 }
 .forsida-spec-block:first-child { border-top: 1px solid var(--rule-lt); }
 .forsida-spec-key {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
   font-family: var(--mono);
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted-dk);
   margin-bottom: 3px;
 }
 .forsida-spec-val {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--muted-dk);
-  line-height: 1.35;
+  line-height: 1.45;
 }
 
 .forsida-cta-row {
@@ -276,38 +284,40 @@ html, body, #root {
 .btn-primary {
   display: inline-flex;
   align-items: center;
-  padding: 14px 20px;
+  padding: 14px 22px;
   background: var(--accent);
   border: none;
   color: #fff;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   font-family: var(--font);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
   transition: filter 0.12s;
   -webkit-tap-highlight-color: transparent;
 }
 .btn-primary:hover { filter: brightness(1.12); }
+.btn-primary:focus-visible { outline: 3px solid var(--text-dark); outline-offset: 2px; }
 
 .btn-outline {
   display: inline-flex;
   align-items: center;
-  padding: 13px 18px;
+  padding: 13px 20px;
   background: none;
-  border: 1px solid var(--rule-lt-strong);
+  border: 1.5px solid var(--rule-lt-strong);
   color: var(--muted-dk);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   font-family: var(--font);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
   transition: border-color 0.12s, color 0.12s;
   -webkit-tap-highlight-color: transparent;
 }
 .btn-outline:hover { border-color: var(--text-dark); color: var(--text-dark); }
+.btn-outline:focus-visible { outline: 3px solid var(--text-dark); outline-offset: 2px; }
 
 .forsida-right {
   grid-column: 2;
@@ -328,18 +338,18 @@ html, body, #root {
   left: 24px;
   right: 24px;
   background: var(--paper);
-  border-left: 2px solid var(--accent);
-  padding: 14px 18px;
+  border-left: 3px solid var(--accent);
+  padding: 16px 20px;
   z-index: 5;
 }
 .forsida-grade-label {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
   font-family: var(--mono);
-  letter-spacing: 0.14em;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
   color: var(--muted-dk);
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 .forsida-grade-num {
   font-size: 56px;
@@ -350,27 +360,41 @@ html, body, #root {
   font-variant-numeric: tabular-nums;
 }
 .forsida-grade-sub {
-  font-size: 10px;
+  font-size: 13px;
   color: var(--muted-dk);
   font-family: var(--mono);
+  margin-top: 4px;
 }
 
-/* Ghost strip */
+/* Ghost strip / ticker */
 .forsida-ghost-strip {
   grid-column: 1 / -1;
   grid-row: 2;
-  font-size: clamp(28px, 4.1vw, 58px);
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  color: rgba(255,255,255,0.72);
-  mix-blend-mode: overlay;
-  white-space: nowrap;
   overflow: hidden;
-  padding: 8px 56px;
   background: var(--text-dark);
   border-top: 1px solid var(--rule-lt);
   position: relative;
   z-index: 2;
+}
+
+.forsida-ghost-inner {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: clamp(24px, 3.6vw, 52px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: rgba(243,242,242,0.60);
+  padding: 8px 0;
+  animation: forsida-ticker 28s linear infinite;
+}
+
+@keyframes forsida-ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-33.333%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .forsida-ghost-inner { animation: none; }
 }
 
 /* Footer */
@@ -386,10 +410,10 @@ html, body, #root {
   z-index: 2;
 }
 .forsida-footer span {
-  font-size: 9px;
-  font-weight: 800;
+  font-size: 11px;
+  font-weight: 700;
   font-family: var(--mono);
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted-dk);
 }
@@ -404,7 +428,7 @@ html, body, #root {
   .forsida-left { border-right: none; grid-column: 1; }
   .forsida-lower { grid-template-columns: 1fr; }
   .forsida-spec-col { display: none; }
-  .forsida-ghost-strip { font-size: 24px; padding: 6px 24px; }
+  .forsida-ghost-inner { font-size: 22px; }
   .forsida-footer { padding: 12px 24px; flex-wrap: wrap; gap: 16px; }
 }
 
@@ -436,10 +460,21 @@ html, body, #root {
   background: var(--ink);
 }
 
+.innskraning-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin-bottom: 32px;
+}
+
 .innskraning-kicker {
-  font-size: 10px;
+  font-size: 11px;
   font-family: var(--mono);
-  letter-spacing: 0.15em;
+  letter-spacing: 0.12em;
   color: var(--muted);
   margin-bottom: 20px;
 }

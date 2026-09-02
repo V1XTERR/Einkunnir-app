@@ -3,6 +3,7 @@ import './App.css'
 import { ImportWizard } from './ImportWizard'
 import DNAHelix from './DNAHelix'
 import BlackHole from './uploads/BlackHole'
+import { supabase } from './supabase'
 
 // ── Constants ──────────────────────────────────────────────────────
 const STORAGE_KEY = 'einkunnabok_v1'
@@ -438,7 +439,7 @@ function LogoMark({ fill = '#0a0a0a', accent = '#ec3013', size = 18 }) {
 }
 
 // ── TOP NAV ────────────────────────────────────────────────────────
-function TopNav({ page, onNav, loggedIn, sessionAvg }) {
+function TopNav({ page, onNav, loggedIn, sessionAvg, supaUser, onLogout }) {
   const TABS = [
     { key: 'forsida',    label: 'Forsíða' },
     { key: 'innskraning', label: 'Innskráning', hideWhen: loggedIn },
@@ -466,8 +467,12 @@ function TopNav({ page, onNav, loggedIn, sessionAvg }) {
       </div>
       {loggedIn && (
         <div className="top-nav-session">
-          SESSION_GESTUR {sessionAvg !== null ? `// ${fmt(sessionAvg, 2)}` : ''}
+          {supaUser ? supaUser.email.split('@')[0].toUpperCase() : 'GESTUR'}
+          {sessionAvg !== null ? ` // ${fmt(sessionAvg, 2)}` : ''}
         </div>
+      )}
+      {loggedIn && onLogout && (
+        <button className="top-nav-logout" onClick={onLogout}>ÚTSKRÁ</button>
       )}
     </nav>
   )
@@ -557,7 +562,28 @@ function ForsidaPage({ onLogin, onDemoLogin }) {
 
 // ── INNSKRÁNING ────────────────────────────────────────────────────
 function InnskraningPage({ onLogin }) {
-  const helixMarks = [9, 8, 7, 6, 4, 5, 8, 9, 7, 6, 3, 8, 9, 7, 5]
+  const [mode, setMode]       = useState('login')
+  const [email, setEmail]     = useState('')
+  const [password, setPass]   = useState('')
+  const [error, setError]     = useState('')
+  const [success, setSuccess] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  function switchMode(m) { setMode(m); setError(''); setSuccess('') }
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setLoading(true); setError(''); setSuccess('')
+    if (mode === 'login') {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) setError(error.message)
+    } else {
+      const { error } = await supabase.auth.signUp({ email, password })
+      if (error) setError(error.message)
+      else setSuccess('Staðfestingarpóstur sendur — athugaðu inbox og smelltu á hlekkinn.')
+    }
+    setLoading(false)
+  }
 
   return (
     <div className="innskraning">
@@ -570,18 +596,36 @@ function InnskraningPage({ onLogin }) {
           <span>EINKUNNIR.IS</span>
         </div>
         <div className="innskraning-kicker">// ACCESS_01</div>
-        <h1 className="innskraning-title">Innskráning</h1>
 
-        <div className="login-info-box">
-          Gögn þín eru geymd staðbundið á þessum tæki. Ekkert er sent á netþjón.
+        <div className="innskraning-tabs">
+          <button className={`innskraning-tab${mode === 'login' ? ' active' : ''}`} onClick={() => switchMode('login')}>Innskráning</button>
+          <button className={`innskraning-tab${mode === 'signup' ? ' active' : ''}`} onClick={() => switchMode('signup')}>Nýr aðgangur</button>
         </div>
 
-        <button className="login-guest-btn" onClick={onLogin}>
-          Byrja sem gestur →
+        <form onSubmit={handleSubmit}>
+          <div className="form-field">
+            <label className="form-label">Tölvupóstur</label>
+            <input className="form-input" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="nafn@dæmi.is" required autoComplete="email" />
+          </div>
+          <div className="form-field">
+            <label className="form-label">Lykilorð</label>
+            <input className="form-input" type="password" value={password} onChange={e => setPass(e.target.value)} placeholder="••••••••" required minLength={6} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
+          </div>
+          {error   && <div className="login-error">{error}</div>}
+          {success && <div className="login-success">{success}</div>}
+          <button className="login-guest-btn" type="submit" disabled={loading}>
+            {loading ? 'Augnablik...' : mode === 'login' ? 'Skrá inn →' : 'Stofna aðgang →'}
+          </button>
+        </form>
+
+        <div className="login-divider"><span>eða</span></div>
+
+        <button className="btn-outline" style={{ width: '100%', justifyContent: 'center' }} onClick={onLogin}>
+          Halda áfram sem gestur
         </button>
 
         <div className="login-coming-soon">
-          Innskráning með tölvupósti er í þróun — kemur fljótlega.
+          Með aðgangi fylgja gögn þín á milli tækja í gegnum Supabase.
         </div>
       </div>
     </div>
@@ -1219,11 +1263,44 @@ export default function App() {
   const [activeId, setActiveId] = useState(() => loadData().courses[0]?.id)
   const [showImport, setShowImport] = useState(false)
   const [importToast, setImportToast] = useState(null)
+  const [supaUser, setSupaUser] = useState(null)
 
   useEffect(() => { saveData(data) }, [data])
   useEffect(() => {
     if (!data.courses.find(c => c.id === activeId)) setActiveId(data.courses[0]?.id)
   }, [data.courses, activeId])
+
+  // Supabase auth listener
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const user = session?.user ?? null
+      if (event === 'INITIAL_SESSION') {
+        if (user) { setSupaUser(user); setLoggedIn(true); loadSupaData(user.id) }
+      } else if (event === 'SIGNED_IN') {
+        setSupaUser(user); setLoggedIn(true); setPage('afangar'); loadSupaData(user.id)
+      } else if (event === 'SIGNED_OUT') {
+        setSupaUser(null); setLoggedIn(false); setPage('forsida'); setData(loadData())
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  // Auto-save courses to Supabase when logged in
+  useEffect(() => {
+    if (!supaUser) return
+    const t = setTimeout(() => {
+      supabase.from('user_data').upsert({ id: supaUser.id, courses: data.courses, updated_at: new Date().toISOString() })
+    }, 900)
+    return () => clearTimeout(t)
+  }, [data.courses, supaUser])
+
+  async function loadSupaData(userId) {
+    const { data: row } = await supabase.from('user_data').select('courses').eq('id', userId).single()
+    if (row?.courses?.length) {
+      setData({ courses: row.courses })
+      setActiveId(row.courses[0]?.id)
+    }
+  }
 
   function handleLogin() {
     setLoggedIn(true)
@@ -1233,6 +1310,10 @@ export default function App() {
   function handleDemoLogin() {
     setLoggedIn(true)
     setPage('afangar')
+  }
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
   }
 
   function handleNav(key) {
@@ -1278,7 +1359,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <TopNav page={page} onNav={handleNav} loggedIn={loggedIn} sessionAvg={sessionAvg} />
+      <TopNav page={page} onNav={handleNav} loggedIn={loggedIn} sessionAvg={sessionAvg} supaUser={supaUser} onLogout={supaUser ? handleLogout : null} />
 
       {page === 'forsida' && (
         <ForsidaPage

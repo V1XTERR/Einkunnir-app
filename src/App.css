@@ -682,6 +682,21 @@ html, body, #root {
   line-height: 1.4;
 }
 
+.login-forgot {
+  display: block;
+  background: none;
+  border: none;
+  color: var(--faint);
+  font-size: 12px;
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  padding: 10px 0 0;
+  text-align: left;
+  transition: color 0.12s;
+}
+.login-forgot:hover { color: var(--text); }
+
 .login-divider {
   display: flex;
   align-items: center;

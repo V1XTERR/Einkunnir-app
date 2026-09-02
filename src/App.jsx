@@ -665,10 +665,16 @@ function InnskraningPage({ onLogin }) {
     if (mode === 'login') {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setError(error.message)
-    } else {
+    } else if (mode === 'signup') {
       const { error } = await supabase.auth.signUp({ email, password })
       if (error) setError(error.message)
       else setSuccess('Staðfestingarpóstur sendur — athugaðu inbox og smelltu á hlekkinn.')
+    } else if (mode === 'reset') {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password',
+      })
+      if (error) setError(error.message)
+      else setSuccess('Endurstillingarpóstur sendur — athugaðu inbox.')
     }
     setLoading(false)
   }
@@ -695,15 +701,27 @@ function InnskraningPage({ onLogin }) {
             <label className="form-label">Tölvupóstur</label>
             <input className="form-input" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="nafn@dæmi.is" required autoComplete="email" />
           </div>
-          <div className="form-field">
-            <label className="form-label">Lykilorð</label>
-            <input className="form-input" type="password" value={password} onChange={e => setPass(e.target.value)} placeholder="••••••••" required minLength={6} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
-          </div>
+          {mode !== 'reset' && (
+            <div className="form-field">
+              <label className="form-label">Lykilorð</label>
+              <input className="form-input" type="password" value={password} onChange={e => setPass(e.target.value)} placeholder="••••••••" required minLength={6} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
+            </div>
+          )}
           {error   && <div className="login-error">{error}</div>}
           {success && <div className="login-success">{success}</div>}
           <button className="login-guest-btn" type="submit" disabled={loading}>
-            {loading ? 'Augnablik...' : mode === 'login' ? 'Skrá inn →' : 'Stofna aðgang →'}
+            {loading ? 'Augnablik...' : mode === 'login' ? 'Skrá inn →' : mode === 'signup' ? 'Stofna aðgang →' : 'Senda endurstillingarpóst →'}
           </button>
+          {mode === 'login' && (
+            <button type="button" className="login-forgot" onClick={() => switchMode('reset')}>
+              Gleymt lykilorð?
+            </button>
+          )}
+          {mode === 'reset' && (
+            <button type="button" className="login-forgot" onClick={() => switchMode('login')}>
+              ← Til baka
+            </button>
+          )}
         </form>
 
         <div className="login-divider"><span>eða</span></div>

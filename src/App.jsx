@@ -458,7 +458,7 @@ function TopNav({ page, onNav, loggedIn, sessionAvg }) {
 }
 
 // ── FORSÍÐA ────────────────────────────────────────────────────────
-function ForsidaPage({ onLogin }) {
+function ForsidaPage({ onLogin, onDemoLogin }) {
   const grades = [8, 7, 6, 4.5, 9, 5, 3, 8.5, 7, 6.5, 4, 9, 7, 5, 8, 6, 4, 9]
 
   return (
@@ -489,7 +489,7 @@ function ForsidaPage({ onLogin }) {
             </div>
             <div className="forsida-cta-row">
               <button className="btn-primary" onClick={onLogin}>Skrá inn →</button>
-              <button className="btn-outline" onClick={onLogin}>Demo</button>
+              <button className="btn-outline" onClick={onDemoLogin}>Demo</button>
             </div>
           </div>
           <div className="forsida-spec-col">
@@ -530,39 +530,7 @@ function ForsidaPage({ onLogin }) {
 
 // ── INNSKRÁNING ────────────────────────────────────────────────────
 function InnskraningPage({ onLogin }) {
-  const [tab, setTab] = useState('inn') // 'inn' | 'stofna'
-  const [boxes, setBoxes] = useState(['', '', '', ''])
-  const [error, setError] = useState(false)
-  const boxRefs = [useRef(), useRef(), useRef(), useRef()]
   const helixMarks = [9, 8, 7, 6, 4, 5, 8, 9, 7, 6, 3, 8, 9, 7, 5]
-
-  function handleBoxKey(i, e) {
-    if (e.key === 'Backspace' && !boxes[i] && i > 0) {
-      boxRefs[i - 1].current?.focus()
-    }
-  }
-
-  function handleBoxChange(i, val) {
-    const digit = val.slice(-1)
-    if (!/^\d?$/.test(digit)) return
-    setError(false)
-    const next = [...boxes]
-    next[i] = digit
-    setBoxes(next)
-    if (digit && i < 3) boxRefs[i + 1].current?.focus()
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault()
-    const code = boxes.join('')
-    if (code === '9999') {
-      onLogin()
-    } else {
-      setError(true)
-      setBoxes(['', '', '', ''])
-      boxRefs[0].current?.focus()
-    }
-  }
 
   return (
     <div className="innskraning">
@@ -572,61 +540,18 @@ function InnskraningPage({ onLogin }) {
       <div className="innskraning-form-wrap">
         <div className="innskraning-kicker">// ACCESS_01</div>
         <h1 className="innskraning-title">Innskráning</h1>
-        <p className="innskraning-sub">Einkunnakerfið þitt.</p>
 
-        <div className="innskraning-tabs">
-          <button className={`innskraning-tab${tab === 'inn' ? ' active' : ''}`} onClick={() => setTab('inn')}>Innskráning</button>
-          <button className={`innskraning-tab${tab === 'stofna' ? ' active' : ''}`} onClick={() => setTab('stofna')}>Stofna aðgang</button>
+        <div className="login-info-box">
+          Gögn þín eru geymd staðbundið á þessum tæki. Ekkert er sent á netþjón.
         </div>
 
-        <div className="form-notice">
-          Innskráning með tölvupósti kemur fljótlega.
+        <button className="login-guest-btn" onClick={onLogin}>
+          Byrja sem gestur →
+        </button>
+
+        <div className="login-coming-soon">
+          Innskráning með tölvupósti er í þróun — kemur fljótlega.
         </div>
-
-        {tab === 'inn' ? (
-          <>
-            <div className="form-field">
-              <label className="form-label">Netfang</label>
-              <input className="form-input" type="email" placeholder="nafn@skoli.is" disabled />
-            </div>
-            <div className="form-field">
-              <label className="form-label">Lykilorð</label>
-              <input className="form-input" type="password" placeholder="••••••••" disabled />
-            </div>
-          </>
-        ) : (
-          <div className="form-field">
-            <label className="form-label">Netfang</label>
-            <input className="form-input" type="email" placeholder="nafn@skoli.is" disabled />
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="passcode-section">
-            <div className="passcode-label">Aðgangskóði gests</div>
-            <div className="passcode-row">
-              <div className="passcode-boxes">
-                {boxes.map((v, i) => (
-                  <input
-                    key={i}
-                    ref={boxRefs[i]}
-                    className={`passcode-box${error ? ' error' : ''}`}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={v}
-                    onChange={e => handleBoxChange(i, e.target.value)}
-                    onKeyDown={e => handleBoxKey(i, e)}
-                    onClick={() => boxRefs[i].current?.select()}
-                  />
-                ))}
-              </div>
-              <button className="passcode-submit" type="submit">Staðfesta</button>
-            </div>
-            {error && <div className="login-error">Rangur kóði — reyndu aftur (9999)</div>}
-          </div>
-        </form>
-        <p className="login-storage-note">GESTAKÓÐI // 9999 · NETFANG // Í VINNSLU · DULKÓÐUN // LOCAL_STORAGE</p>
       </div>
     </div>
   )
@@ -710,6 +635,9 @@ function CourseDetail({ course, onChange, onOpenCalc }) {
     : stats.passStatus === 'fail-loka' ? `✗ Fallið — lokapróf undir ${fmt(course.lokaprófMin, 1)}`
     : '✗ Fallið'
 
+  // Óskráð váegi derived values
+  const unregisteredWeight = Math.max(0, 100 - stats.totalWeight)
+
   return (
     <>
       {/* Stats row */}
@@ -720,7 +648,7 @@ function CourseDetail({ course, onChange, onOpenCalc }) {
             ? <div className="stat-value" style={{ color: 'var(--muted)', fontSize: 28 }}>—</div>
             : <div className="stat-value" style={{ color: gradeColor(stats.currentAvg) }}>{fmt(stats.currentAvg)}</div>
           }
-          <div className="stat-sub" style={{ color: stats.passStatus === 'pass' ? 'var(--pass)' : stats.passStatus ? 'var(--accent)' : 'var(--muted)' }}>{passLabel}</div>
+          <div className="stat-sub" style={{ color: stats.passStatus === 'pass' ? 'var(--pass)' : stats.passStatus ? 'var(--accent)' : 'var(--muted-dk)' }}>{passLabel}</div>
         </div>
         <div className="stat-cell">
           <div className="stat-label">Metið</div>
@@ -733,12 +661,18 @@ function CourseDetail({ course, onChange, onOpenCalc }) {
           <div className="stat-sub">eftir ómetið</div>
         </div>
         <div className="stat-cell">
-          <div className="stat-label">Skráð váegi</div>
+          <div className="stat-label">Óskráð váegi</div>
           <div className="stat-value" style={{ color: weightOver ? 'var(--accent)' : undefined }}>
-            {fmt(stats.totalWeight, 0)}<span className="stat-unit">%</span>
+            {fmt(unregisteredWeight, 0)}<span className="stat-unit">%</span>
           </div>
-          <div className="stat-sub" style={{ color: weightOver ? 'var(--accent)' : undefined }}>
-            {weightOver ? 'váegi yfir 100%' : 'ekki skráð enn'}
+          <div className="stat-sub" style={{ color: weightOver ? 'var(--accent)' : stats.totalWeight >= 100 ? 'var(--pass)' : undefined }}>
+            {weightOver
+              ? 'váegi yfir 100% — leiðrétta'
+              : stats.totalWeight === 0
+                ? 'ekkert váegi skráð'
+                : stats.totalWeight >= 100
+                  ? 'allt váegi skráð ✓'
+                  : `${fmt(unregisteredWeight, 0)}% eftir óskráð`}
           </div>
         </div>
       </div>
@@ -890,7 +824,6 @@ function AfangarPage({ data, setData, activeId, setActiveId, onOpenCalc, onImpor
   const allStats = data.courses.map(c => calcCourse(c))
   const graded = allStats.filter(s => s.currentAvg !== null)
   const sessionAvg = graded.length > 0 ? graded.reduce((sum, s) => sum + s.currentAvg, 0) / graded.length : null
-  const sidebarHelixMarks = graded.map(s => s.currentAvg)
 
   return (
     <div className="afangar">
@@ -907,8 +840,7 @@ function AfangarPage({ data, setData, activeId, setActiveId, onOpenCalc, onImpor
               <div key={c.id} className={`afangar-item${isActive ? ' active' : ''}`} onClick={() => setActiveId(c.id)}>
                 <span className="afangar-item-bullet">■</span>
                 <div className="afangar-item-info">
-                  <div className="afangar-item-code">{c.name.slice(0, 10)}</div>
-                  <div className="afangar-item-name">{c.name}</div>
+                  <div className="afangar-item-name" title={c.name}>{c.name}</div>
                 </div>
                 <span className="afangar-item-grade" style={{ color: gradeColor(s.currentAvg) }}>
                   {s.currentAvg !== null ? fmt(s.currentAvg, 1) : '—'}
@@ -924,15 +856,14 @@ function AfangarPage({ data, setData, activeId, setActiveId, onOpenCalc, onImpor
             )
           })}
         </div>
-        <div className="afangar-panel-helix-box">
-          <DNAHelix tone="dark" accent="#ec3013" marks={sidebarHelixMarks} speed={30} radius={1.0} turns={2.8} thickness={0.85} />
-          {sessionAvg !== null && (
-            <div className="afangar-panel-avg">
-              <div className="afangar-panel-avg-label">MISSERISMEÐALTAL</div>
-              <div className="afangar-panel-avg-val" style={{ color: gradeColor(sessionAvg) }}>{fmt(sessionAvg, 2)}</div>
+        {sessionAvg !== null && (
+          <div className="afangar-session-avg">
+            <div className="afangar-session-avg-label">Misserismeðaltal</div>
+            <div className="afangar-session-avg-val" style={{ color: gradeColor(sessionAvg) }}>
+              {fmt(sessionAvg, 2)}
             </div>
-          )}
-        </div>
+          </div>
+        )}
         <div className="afangar-panel-footer">
           <button className="panel-btn" onClick={addCourse}>+ Nýr áfangi</button>
           <button className="panel-btn" onClick={() => setShowImport(true)}>↓ Flytja inn</button>
@@ -946,7 +877,7 @@ function AfangarPage({ data, setData, activeId, setActiveId, onOpenCalc, onImpor
             <div className="course-detail-hdr">
               <div className="course-detail-kicker">
                 <span style={{ fontFamily: 'var(--mono)', color: 'var(--accent)', fontSize: 10 }}>■</span>
-                {activeCourse.name.toUpperCase().slice(0, 14)} // {activeCourseStats.totalWeight.toFixed(0)} VÁEGI
+                {activeCourse.name.toUpperCase()} // {activeCourseStats.totalWeight.toFixed(0)} VÁEGI
               </div>
               <div className="course-detail-hdr-main">
                 <input
@@ -955,12 +886,6 @@ function AfangarPage({ data, setData, activeId, setActiveId, onOpenCalc, onImpor
                   onChange={e => renameCourse(activeCourse.id, e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && e.target.blur()}
                 />
-                <div className="course-hdr-grade-block">
-                  <div className="course-hdr-grade-label">LOKAEINKUNN</div>
-                  <div className="course-hdr-grade-val" style={{ color: gradeColor(activeCourseStats.currentAvg) }}>
-                    {activeCourseStats.weightError ? '—' : fmt(activeCourseStats.currentAvg)}
-                  </div>
-                </div>
               </div>
             </div>
             <div className="course-detail-body">
@@ -993,6 +918,7 @@ function AfangarPage({ data, setData, activeId, setActiveId, onOpenCalc, onImpor
 // ── REIKNIVÉL PAGE ─────────────────────────────────────────────────
 function ReiknivélPage({ data, activeId }) {
   const [targetGrade, setTargetGrade] = useState(5)
+  const [targetStr, setTargetStr] = useState('5,0')
   const [whatIf, setWhatIf] = useState(false)
   const [whatIfStr, setWhatIfStr] = useState('')
 
@@ -1018,9 +944,8 @@ function ReiknivélPage({ data, activeId }) {
     { label: 'Toppur', grade: 9.5 },
   ]
 
-  const helixMarks = course.assessments
-    .filter(a => a.grade !== '' && !isNaN(parseNum(a.grade)))
-    .map(a => parseNum(a.grade))
+  // Check if course is fully assessed
+  const courseComplete = stats.totalWeight >= 99.9 && ungradedWeight < 0.01 && stats.currentAvg !== null
 
   return (
     <div className="reiknivel">
@@ -1037,27 +962,58 @@ function ReiknivélPage({ data, activeId }) {
                 {stats.weightError ? '—' : fmt(stats.currentAvg)}
               </div>
             </div>
-            <div className="calc-score-meta">
-              <div>{fmt(stats.completedWeight, 0)}% metið</div>
-              <div>{fmt(ungradedWeight, 0)}% eftir</div>
-            </div>
+            {stats.totalWeight > 0 ? (
+              <div className="calc-score-meta">
+                <div>{fmt(stats.completedWeight, 0)}% metið</div>
+                <div>{fmt(ungradedWeight, 0)}% eftir</div>
+              </div>
+            ) : (
+              <div className="calc-score-meta">
+                <div>Engin váegi skráð</div>
+              </div>
+            )}
           </div>
         </div>
 
-        {!stats.weightError && course.assessments.length > 0 && ungradedWeight > 0.01 && (
+        {courseComplete && (
+          <div className="calc-block">
+            <div className="calc-block-title">NÁMSKEIÐ LOKIÐ</div>
+            <div className="calc-needed-big" style={{ color: gradeColor(stats.currentAvg) }}>
+              {fmt(stats.currentAvg)}
+            </div>
+            <div className="calc-needed-sub">Námskeið lokið — öll mat skráð.</div>
+          </div>
+        )}
+
+        {!courseComplete && !stats.weightError && course.assessments.length > 0 && ungradedWeight > 0.01 && (
           <>
             <div className="calc-block">
               <div className="calc-block-title">ÞÚ ÞARFT AÐ MEÐALTALI</div>
-              <div className="calc-slider-row">
-                <span className="calc-slider-label">Markmið: {targetGrade.toFixed(1).replace('.', ',')}</span>
+              <div className="calc-target-wrap">
+                <span className="calc-lbl">Ég vil enda með</span>
                 <input
-                  type="range"
-                  min="0" max="10" step="0.5"
-                  value={targetGrade}
-                  className="calc-slider"
-                  onChange={e => setTargetGrade(parseFloat(e.target.value))}
+                  className="calc-target-input"
+                  inputMode="decimal"
+                  value={targetStr}
+                  onChange={e => {
+                    setTargetStr(e.target.value)
+                    const v = parseNum(e.target.value)
+                    if (!isNaN(v) && v >= 0 && v <= 10) setTargetGrade(v)
+                  }}
+                  onBlur={() => setTargetStr(targetGrade.toFixed(1).replace('.', ','))}
                 />
               </div>
+              <input
+                type="range"
+                min="0" max="10" step="0.1"
+                value={targetGrade}
+                className="calc-slider"
+                onChange={e => {
+                  const v = parseFloat(e.target.value)
+                  setTargetGrade(v)
+                  setTargetStr(v.toFixed(1).replace('.', ','))
+                }}
+              />
               <div className="calc-needed-big" style={{ color: needed === null ? 'var(--pass)' : needed <= 0 ? 'var(--pass)' : needed > 10 ? 'var(--accent)' : gradeColor(needed) }}>
                 {needed === null || needed <= 0
                   ? 'Þegar náð ✓'
@@ -1079,7 +1035,7 @@ function ReiknivélPage({ data, activeId }) {
                 {scenarios.map(sc => {
                   const scNeeded = (sc.grade - stats.earnedPoints) / (ungradedWeight / 100)
                   return (
-                    <div key={sc.label} className="calc-scenario" onClick={() => setTargetGrade(sc.grade)}>
+                    <div key={sc.label} className="calc-scenario" onClick={() => { setTargetGrade(sc.grade); setTargetStr(sc.grade.toFixed(1).replace('.', ',')) }}>
                       <div className="calc-scenario-label">{sc.label}</div>
                       <div className="calc-scenario-target">{sc.grade.toFixed(1).replace('.', ',')}</div>
                       <div className="calc-scenario-needed" style={{ color: scNeeded > 10 ? 'var(--accent)' : scNeeded <= 0 ? 'var(--pass)' : gradeColor(scNeeded) }}>
@@ -1114,9 +1070,6 @@ function ReiknivélPage({ data, activeId }) {
           </>
         )}
       </div>
-      <div className="reiknivel-helix">
-        <DNAHelix tone="dark" accent="#ec3013" marks={helixMarks} speed={24} radius={1.0} turns={3.0} thickness={0.9} />
-      </div>
     </div>
   )
 }
@@ -1130,7 +1083,6 @@ function NamsferillPage({ data }) {
     : null
 
   const allGrades = gradedCourses.map(({ s }) => s.currentAvg)
-  const marks = allGrades
 
   // Histogram buckets 1–10
   const buckets = Array.from({ length: 10 }, (_, i) => {
@@ -1191,6 +1143,7 @@ function NamsferillPage({ data }) {
           <div className="nf-hist-bars">
             {buckets.map((count, i) => (
               <div key={i} className="nf-hist-bar-wrap">
+                {count > 0 && <div className="nf-hist-count">{count}</div>}
                 <div
                   className={`nf-hist-bar${count === 0 ? ' empty' : ''}${i + 1 < 5 ? ' accent' : ''}`}
                   style={{ height: count > 0 ? `${(count / maxBucket) * 100}%` : undefined }}
@@ -1204,13 +1157,11 @@ function NamsferillPage({ data }) {
               <div key={i} className="nf-hist-tick">{i + 1}</div>
             ))}
           </div>
+          <div className="nf-hist-x-label">Einkunn</div>
         </div>
       </div>
 
       <div className="namsferill-sidebar">
-        <div className="nf-helix-box">
-          <DNAHelix tone="dark" accent="#ec3013" marks={marks} speed={20} radius={1.0} turns={2.8} thickness={0.85} />
-        </div>
         <div className="nf-info-box">
           {[
             ['Nemandi', 'Gestur_0417'],
@@ -1244,6 +1195,11 @@ export default function App() {
   }, [data.courses, activeId])
 
   function handleLogin() {
+    setLoggedIn(true)
+    setPage('afangar')
+  }
+
+  function handleDemoLogin() {
     setLoggedIn(true)
     setPage('afangar')
   }
@@ -1293,7 +1249,12 @@ export default function App() {
     <div className="app">
       <TopNav page={page} onNav={handleNav} loggedIn={loggedIn} sessionAvg={sessionAvg} />
 
-      {page === 'forsida' && <ForsidaPage onLogin={() => setPage('innskraning')} />}
+      {page === 'forsida' && (
+        <ForsidaPage
+          onLogin={() => setPage('innskraning')}
+          onDemoLogin={handleDemoLogin}
+        />
+      )}
 
       {page === 'innskraning' && <InnskraningPage onLogin={handleLogin} />}
 

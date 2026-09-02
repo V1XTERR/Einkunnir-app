@@ -567,7 +567,7 @@ function TopNav({ page, onNav, loggedIn, sessionAvg, supaUser, onLogout, onProfi
 }
 
 // ── FORSÍÐA ────────────────────────────────────────────────────────
-function ForsidaPage({ onLogin }) {
+function ForsidaPage({ onLogin, onOpen, loggedIn }) {
   const grades = [8, 7, 6, 4.5, 9, 5, 3, 8.5, 7, 6.5, 4, 9, 7, 5, 8, 6, 4, 9]
 
   return (
@@ -601,7 +601,10 @@ function ForsidaPage({ onLogin }) {
               ))}
             </div>
             <div className="forsida-cta-row">
-              <button className="btn-primary" onClick={onLogin}>SKRÁ INN →</button>
+              {loggedIn
+                ? <button className="btn-primary" onClick={onOpen}>OPNA ÁFANGA →</button>
+                : <button className="btn-primary" onClick={onLogin}>SKRÁ INN →</button>
+              }
             </div>
           </div>
           <div className="forsida-spec-col">
@@ -1510,6 +1513,8 @@ export default function App() {
       {page === 'forsida' && (
         <ForsidaPage
           onLogin={() => setPage('innskraning')}
+          onOpen={() => setPage('afangar')}
+          loggedIn={loggedIn}
         />
       )}
 
